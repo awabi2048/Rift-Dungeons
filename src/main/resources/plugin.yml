@@ -1,0 +1,9 @@
+name: Rift-Dungeons
+version: '0.1-ALPHA'
+main: awabi2048.rift_dungeons.Main
+api-version: '1.21'
+authors: [ awabi2048 ]
+
+commands:
+  generate:
+    description: ""
