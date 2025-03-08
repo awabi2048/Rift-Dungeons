@@ -27,4 +27,17 @@ object Lib {
             Random(0)
         )
     }
+
+    fun getSession(name: String): DungeonSession? {
+        if (!name.startsWith("rd_session.")) return null
+
+        try {
+            val uuid = UUID.fromString(name.substringAfter("rd_session."))
+            val session = Main.dungeonSessions.find { it.uuid == uuid }
+
+            return session
+        } catch (e: Exception) {
+            return null
+        }
+    }
 }

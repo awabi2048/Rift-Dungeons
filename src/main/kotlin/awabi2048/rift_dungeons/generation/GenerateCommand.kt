@@ -19,18 +19,6 @@ object GenerateCommand : CommandExecutor {
         val generator = Generator(Style.valueOf(style), size)
         generator.generate(p0.location.toBlockLocation())
 
-//        if (p3[0] == "start"){
-//            val uuid = UUID.randomUUID()
-//            val uuid = p0.uniqueId
-//            branchQueue[uuid] = mutableListOf()
-//            generated[uuid] = mutableMapOf()
-//
-//            val branch = Branch(Vector(0.0, 0.0, 1.0), Vector(0.0, 0.0, 0.0), uuid)
-//            branch.start(p0.location)
-//
-//            p0.sendMessage("GENERATION STARTED")
-//        }
-
         return true
     }
 }

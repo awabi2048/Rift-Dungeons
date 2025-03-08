@@ -7,13 +7,12 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.structure.StructureRotation
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Vector
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
-class Generator(private val style: Style, private val size: Int) {
+class Generator(val style: Style, val size: Int) {
 
     // ブロック幅の座標（開始位置がX = 0）
     private val blockCoordinates = (-size / 2..size / 2).filter { it != 0 }
@@ -24,10 +23,6 @@ class Generator(private val style: Style, private val size: Int) {
 
         // まず点を生成
         val points = generatePoints()
-
-        points.map { it.clone().multiply(style.structureSize) }.forEach {
-            baseLocation.clone().add(it).add(Vector(0, 40, 0)).block.type = Material.DIAMOND_BLOCK
-        }
 
         // それぞれの点と隣接点との関係からその位置で置かれるべきStructureを取得
         points.forEach {
@@ -42,14 +37,17 @@ class Generator(private val style: Style, private val size: Int) {
                 it.clone().add(branch) in points
             }.toSet()
 
-            // Structureに変換
-            val structure = getStructure(paths)
+            // Structureに変換: 開始地点のストラクチャーは特別に処理
+            val structure = if (it == Vector(0, 0, -1)) {
+                Structure(StructureType.START, 0)
+            } else getStructure(paths)
+
             generationData[it] = structure
         }
 
         val generationDelay = 2L
 
-        repeat (generationData.size) {
+        repeat(generationData.size) {
             Bukkit.getScheduler().runTaskLater(
                 instance,
                 Runnable {
@@ -103,8 +101,8 @@ class Generator(private val style: Style, private val size: Int) {
             onAxisPoints.add(Vector(0, 0, z))
         }
 
-        // 上記の過程で得られた点を総合
-        val resultPoints = (randomPoints + perpendicularPoints + onAxisPoints).distinct()
+        // 上記の過程で得られた点を総合、開始地点を足す
+        val resultPoints = (randomPoints + perpendicularPoints + onAxisPoints + Vector(0, 0, -1)).distinct()
 
         return resultPoints.toSet()
     }
@@ -203,9 +201,10 @@ class Generator(private val style: Style, private val size: Int) {
         val index = "a"
         val structurePath = "${style.name.lowercase()}.${structure.type}.$index"
 
-        val basePlaceLocation = baseLocation.clone().add(normalizedPosition.multiply(style.structureSize)).add(Vector(-style.structureSize / 2, 0, -style.structureSize / 2))
+        val basePlaceLocation = baseLocation.clone().add(normalizedPosition.clone().multiply(style.structureSize))
+            .add(Vector(-style.structureSize / 2, 0, -style.structureSize / 2))
 
-        val placeLocation = when(structure.rotation) {
+        val placeLocation = when (structure.rotation) {
             0 -> basePlaceLocation
             1 -> basePlaceLocation.clone().add(Vector(0, 0, style.structureSize - 1))
             2 -> basePlaceLocation.clone().add(Vector(style.structureSize - 1, 0, style.structureSize - 1))
@@ -213,7 +212,7 @@ class Generator(private val style: Style, private val size: Int) {
             else -> throw IllegalStateException()
         }
 
-        val rotation = when(structure.rotation) {
+        val rotation = when (structure.rotation) {
             0 -> StructureRotation.NONE
             1 -> StructureRotation.COUNTERCLOCKWISE_90
             2 -> StructureRotation.CLOCKWISE_180
@@ -222,6 +221,5 @@ class Generator(private val style: Style, private val size: Int) {
         }
 
         Lib.loadStructure(placeLocation, structurePath, rotation)
-        println("PLACED AT ($placeLocation), $structurePath, $rotation")
     }
 }

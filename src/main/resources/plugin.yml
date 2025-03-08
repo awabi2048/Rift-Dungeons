@@ -7,3 +7,5 @@ authors: [ awabi2048 ]
 commands:
   generate:
     description: ""
+  start_dungeons:
+    description: ""
