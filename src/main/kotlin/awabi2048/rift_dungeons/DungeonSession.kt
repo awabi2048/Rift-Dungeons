@@ -5,19 +5,27 @@ import awabi2048.rift_dungeons.Main.Companion.instance
 import awabi2048.rift_dungeons.generation.Generator
 import net.kyori.adventure.text.TextComponent
 import org.bukkit.*
+import org.bukkit.attribute.Attribute
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.type.Barrel
+import org.bukkit.entity.Damageable
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Interaction
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Zombie
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
 import org.joml.Matrix4f
+import org.joml.Quaternionf
 import java.util.*
 import javax.annotation.Nonnull
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 class DungeonSession(
     val uuid: UUID,
@@ -28,6 +36,8 @@ class DungeonSession(
 
     val size = generator.size
     val style = generator.style
+
+    private val mobSpawner = MobSpawner(style)
 
     val world: World?
         get() {
@@ -92,43 +102,50 @@ class DungeonSession(
             nearbyEntities.filter { (it.customName() as TextComponent).content() == "CHEST" }
                 .forEach {
                     it.remove()
-                    it.location.toBlockLocation().block.setType(Material.BARREL, true)
-                    (it.location.toBlockLocation().block as Barrel).facing = BlockFace.UP
+                    loadLootChest(it.location.toBlockLocation())
                 }
 
             nearbyEntities.filter { (it.customName() as TextComponent).content() == "ITEM" }
                 .forEach {
                     it.remove()
-                    it.location.toBlockLocation().block.setType(Material.EMERALD_BLOCK, true)
+                    loadLootItem(it.location.toBlockLocation())
                 }
 
             nearbyEntities.filter { (it.customName() as TextComponent).content() == "MOB" }
                 .forEach {
                     it.remove()
-                    world?.spawnEntity(it.location, EntityType.ZOMBIE)
+                    loadMob(it.location.toBlockLocation())
                 }
         }
     }
 
     private fun loadMob(location: Location) {
-
+        mobSpawner.spawn(location)
     }
 
     private fun loadLootChest(location: Location) {
         location.block.setType(Material.BARREL, true)
-        (location.block as Barrel).facing = BlockFace.UP
-
-        val interaction = location.world.spawnEntity(location, EntityType.INTERACTION) as Interaction
-        interaction.interactionWidth = 1.05f
-        interaction.interactionHeight = 1.05f
-        interaction.isResponsive = true
-        interaction.addScoreboardTag("rd.interaction.loot_chest")
     }
 
     private fun loadLootItem(location: Location) {
         // アイテムをばら撒く
-        val itemDisplay = location.world.spawnEntity(location, EntityType.ITEM_DISPLAY) as ItemDisplay
+        val itemDisplay = location.world.spawnEntity(location.toCenterLocation(), EntityType.ITEM_DISPLAY) as ItemDisplay
         itemDisplay.setItemStack(ItemStack(Material.STONE_SWORD))
-        itemDisplay.transformation.leftRotation =
+
+        val quaternion = Quaternionf().rotateY(Math.toRadians(90.0).toFloat())
+
+        val transformation = itemDisplay.transformation
+
+        itemDisplay.transformation = Transformation(
+            transformation.translation,
+            quaternion,
+            transformation.scale,
+            transformation.rightRotation
+        )
+
+        val interaction = location.world.spawnEntity(location, EntityType.INTERACTION) as Interaction
+        interaction.interactionWidth = 0.75f
+        interaction.interactionHeight = 0.2f
+        interaction.addScoreboardTag("rd.interaction.loot_item")
     }
 }

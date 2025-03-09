@@ -197,8 +197,8 @@ class Generator(val style: Style, val size: Int) {
     }
 
     private fun placeStructure(baseLocation: Location, normalizedPosition: Vector, structure: Structure) {
-        // val index = listOf("a", "b", "c").random()
-        val index = "a"
+         val index = listOf("a", "b").random()
+//        val index = "a"
         val structurePath = "${style.name.lowercase()}.${structure.type}.$index"
 
         val basePlaceLocation = baseLocation.clone().add(normalizedPosition.clone().multiply(style.structureSize))

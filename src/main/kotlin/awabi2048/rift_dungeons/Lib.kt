@@ -4,6 +4,8 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.structure.Mirror
 import org.bukkit.block.structure.StructureRotation
+import org.joml.AxisAngle4f
+import org.joml.Quaternionf
 import java.io.File
 import java.util.*
 
@@ -39,5 +41,13 @@ object Lib {
         } catch (e: Exception) {
             return null
         }
+    }
+
+    fun toQuaternion(yaw: Float, pitch: Float, roll: Float): Quaternionf {
+        val qYaw = Quaternionf(AxisAngle4f(Math.toRadians(yaw.toDouble()).toFloat(), 0f, 1f, 0f))
+        val qPitch = Quaternionf(AxisAngle4f(Math.toRadians(pitch.toDouble()).toFloat(), 1f, 0f, 0f))
+        val qRoll = Quaternionf(AxisAngle4f(Math.toRadians(roll.toDouble()).toFloat(), 0f, 0f, 1f))
+
+        return qYaw.mul(qPitch).mul(qRoll)
     }
 }

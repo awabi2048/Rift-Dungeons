@@ -1,6 +1,8 @@
 package awabi2048.rift_dungeons
 
 import awabi2048.rift_dungeons.commands.StartDungeonCommand
+import awabi2048.rift_dungeons.config.DataFile
+import awabi2048.rift_dungeons.config.MobData
 import awabi2048.rift_dungeons.generation.GenerateCommand
 import awabi2048.rift_dungeons.listener.WorldListener
 import net.kyori.adventure.text.Component
@@ -17,6 +19,9 @@ class Main : JavaPlugin() {
 
     override fun onEnable() {
         instance = this
+
+        DataFile.copy()
+        DataFile.load()
 
         getCommand("generate")?.setExecutor(GenerateCommand)
         getCommand("start_dungeons")?.setExecutor(StartDungeonCommand)

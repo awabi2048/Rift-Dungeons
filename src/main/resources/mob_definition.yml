@@ -1,0 +1,13 @@
+zombie:
+  entity_type: "ZOMBIE"
+  health: 20
+  strength: 3
+  scale: 1.0
+  equipment:
+    mainhand: STONE_SWORD
+    offhand: STONE
+    head: LEATHER_HELMET
+    chest: LEATHER_CHESTPLATE
+    legs: LEATHER_LEGGINGS
+    feet: LEATHER_BOOTS
+
